@@ -50,3 +50,20 @@ If you intend to contribute, fork or understand anyway how the single components
 - Idempotency may be a problem. While I am trying to explicitly declare container tags and modules versions moving forward, there is a chance that if you try to build your own containers from the Dockerfile provided and/or install the project on a cloud instance, the output may be diverging from one setup to another. Generic commands such as `apt-get update`, `npm install` and `gem install sinatra` may lead to different versions of code and modules being pulled at build and setup times.
 - The cache instance is still named `redis-server` (this will be renamed `yelb-cache` in the future for consistency)
 - While the intent was to build an application whose layers could scale out (and scale independently) in a classic microservices scenario, very little testing has gone into scale out deployment scenarios so far. Most of the tests have been done with one (1) instance of service per layer.
+
+
+##### Userdata script
+#!/bin/bash
+sudo yum update -y
+sudo amazon-linux-extras install docker -y
+sudo service docker start
+sudo yum install git -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
+sudo usermod -a -G docker ec2-user
+sudo service docker start
+sudo chkconfig docker on
